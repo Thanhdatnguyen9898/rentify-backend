@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: rentify-backend
+
+  # 1. CẤU HÌNH DATABASE MYSQL (AIVEN CLOUD)
+  datasource:
+    url: jdbc:mysql://rentify-db-rentify-db.c.aivencloud.com:16976/defaultdb?sslMode=REQUIRED&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: avnadmin
+    password: AVNS_WD8nvHRhjA3Qk8tF9I2
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 2. CẤU HÌNH JPA / HIBERNATE
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # 3. CẤU HÌNH REDIS (MEMURAI LOCAL)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# 4. GIÁM SÁT HỆ THỐNG (ACTUATOR & PROMETHEUS)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
