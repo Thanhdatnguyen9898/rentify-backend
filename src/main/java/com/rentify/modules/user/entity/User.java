@@ -1,0 +1,45 @@
+package com.rentify.modules.user.entity;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+@Entity 
+@Table (name = "user")
+@Getter 
+@Setter 
+@NoArgsConstructor 
+@AllArgsConstructor 
+public class User {
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    private String phoneNumber;
+    private String email;
+    private String username;
+    private String passwordHash;
+    private String fullName;
+    private String avatarUrl;
+    private String bio;
+    Boolean isActive = true;
+    Boolean isPhoneVerified = false;
+    BigDecimal walletBalance = BigDecimal.ZERO;
+    @Version 
+    private Long version;   
+    private Instant createdAt;
+    private Instant updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+}
