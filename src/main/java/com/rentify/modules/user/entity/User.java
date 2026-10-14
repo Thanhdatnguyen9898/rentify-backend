@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 @Entity 
-@Table (name = "user")
+@Table (name = "users")
 @Getter 
 @Setter 
 @NoArgsConstructor 
@@ -32,9 +32,9 @@ public class User {
     private String fullName;
     private String avatarUrl;
     private String bio;
-    Boolean isActive = true;
-    Boolean isPhoneVerified = false;
-    BigDecimal walletBalance = BigDecimal.ZERO;
+    private Boolean isActive = true;
+    private Boolean isPhoneVerified = false;
+    private BigDecimal walletBalance = BigDecimal.ZERO;
     @Version 
     private Long version;   
     private Instant createdAt;

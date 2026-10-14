@@ -36,12 +36,12 @@ public class Role {
     private String name;
     private String description;
     private String createdBy;
-    private String updateBy;
+    private String updatedBy;
     private Instant createdAt;
     private Instant updatedAt;
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = {"roles"})
-    @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "role_id"),inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    @JoinTable(name = "permission_role", joinColumns = @JoinColumn(name = "role_id"),inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions;
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = {"role"})
