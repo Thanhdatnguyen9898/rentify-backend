@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rentify.common.util.SecurityUtil;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,15 +41,15 @@ public class Permission {
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "permissions")
     @JsonIgnore
     private Set<Role> roles;
-    // @PrePersist
-    // public void handleBeforeCreate() {
-    //     this.createdBy = SecurityUtil.getCurrentUserLogin().orElse("");
-    //     this.createdAt = Instant.now();
-    // }
+    @PrePersist
+    public void handleBeforeCreate() {
+        this.createdBy = SecurityUtil.getCurrentUserId().map(String::valueOf).orElse("system");
+        this.createdAt = Instant.now();
+    }
 
-    // @PreUpdate
-    // public void handleBeforeUpdate() {
-    //     this.updatedBy = SecurityUtil.getCurrentUserLogin().orElse("");
-    //     this.updatedAt = Instant.now();
-    // }
+    @PreUpdate
+    public void handleBeforeUpdate() {
+        this.updatedBy = SecurityUtil.getCurrentUserId().map(String::valueOf).orElse("system");
+        this.updatedAt = Instant.now();
+    }
 }

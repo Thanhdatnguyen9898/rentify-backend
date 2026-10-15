@@ -33,3 +33,9 @@ management:
     web:
       exposure:
         include: health, info, metrics, prometheus
+#5. CẤU HÌNH JWT
+rentify:
+  jwt:
+    base64-secret: "c2VjcmV0LWtleS1mb3Itcm9vbXp5LXByb3B0ZWNoLXBsYXRmb3JtLXZlcnktc2VjdXJlLWFuZC1sb25nLWVub3VnaA=="
+    access-token-validity-in-seconds: 86400 # 1 ngày (24 giờ)
+    refresh-token-validity-in-seconds: 2592000 # 30 ngày
