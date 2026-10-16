@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rentify.common.response.annotation.ApiMessage;
+import com.rentify.modules.auth.dto.request.GoogleLoginRequest;
 import com.rentify.modules.auth.dto.request.LoginRequest;
 import com.rentify.modules.auth.dto.request.RegisterRequest;
 import com.rentify.modules.auth.dto.response.AuthResponse;
@@ -63,6 +64,14 @@ public class AuthController {
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         this.authService.logout(response);
         return ResponseEntity.ok().build();
+    }
+    @PostMapping("/google")
+    @ApiMessage("Đăng nhập bằng Google thành công")
+    public ResponseEntity<AuthResponse> loginWithGoogle(
+            @Valid @RequestBody GoogleLoginRequest request,
+            HttpServletResponse response) {
+        AuthResponse authResponse = this.authService.loginWithGoogle(request, response);
+        return ResponseEntity.ok(authResponse);
     }
 }
 

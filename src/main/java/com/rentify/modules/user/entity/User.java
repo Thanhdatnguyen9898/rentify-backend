@@ -3,7 +3,11 @@ package com.rentify.modules.user.entity;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import com.rentify.modules.user.enums.AuthProvider;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -42,4 +46,7 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+    private String googleId;
 }

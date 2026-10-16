@@ -41,15 +41,20 @@ public class SecurityUtil {
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(validity)
-                .subject(String.valueOf(user.getId())) // <-- ĐẶT SUBJECT LÀ USER ID
-                .claim("phoneNumber", user.getPhoneNumber())
-                .claim("fullName", user.getFullName())
-                .claim("role", user.getRole() != null ? user.getRole().getName() : "ROLE_USER")
-                .build();
+                .subject(String.valueOf(user.getId()))
+                .claim("fullName", user.getFullName() != null ? user.getFullName() : "")
+                .claim("role", user.getRole() != null ? user.getRole().getName() : "ROLE_USER");
 
+        if (user.getPhoneNumber() != null) {
+            claimsBuilder.claim("phoneNumber", user.getPhoneNumber());
+        }
+        if (user.getEmail() != null) {
+            claimsBuilder.claim("email", user.getEmail());
+        }
+        JwtClaimsSet claims = claimsBuilder.build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }

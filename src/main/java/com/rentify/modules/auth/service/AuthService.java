@@ -1,5 +1,7 @@
 package com.rentify.modules.auth.service;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -9,14 +11,21 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.rentify.common.exception.AppException;
 import com.rentify.common.exception.ErrorCode;
 import com.rentify.common.util.SecurityUtil;
+import com.rentify.modules.auth.dto.request.GoogleLoginRequest;
 import com.rentify.modules.auth.dto.request.LoginRequest;
 import com.rentify.modules.auth.dto.request.RegisterRequest;
 import com.rentify.modules.auth.dto.response.AuthResponse;
 import com.rentify.modules.user.entity.Role;
 import com.rentify.modules.user.entity.User;
+import com.rentify.modules.user.enums.AuthProvider;
 import com.rentify.modules.user.repository.RoleRepository;
 import com.rentify.modules.user.repository.UserRepository;
 
@@ -34,6 +43,8 @@ public class AuthService {
     @Value("${rentify.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
+    @Value("${rentify.oauth2.google.client-id}")
+    private String googleClientId;
     public AuthService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
@@ -184,4 +195,69 @@ public class AuthService {
                 .role(user.getRole() != null ? user.getRole().getName() : null)
                 .build();
     }
+
+    public AuthResponse loginWithGoogle(GoogleLoginRequest request, HttpServletResponse response) {
+    // 1. Xác thực ID Token với Google
+    GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+            new NetHttpTransport(),
+            GsonFactory.getDefaultInstance())
+            .setAudience(Collections.singletonList(this.googleClientId))
+            .build();
+    GoogleIdToken googleIdToken;
+    try {
+        googleIdToken = verifier.verify(request.getIdToken());
+    } catch (Exception e) {
+        throw new AppException(ErrorCode.UNAUTHENTICATED);
+    }
+    if (googleIdToken == null) {
+        throw new AppException(ErrorCode.UNAUTHENTICATED);
+    }
+    // 2. Lấy thông tin user từ Google Payload
+    Payload payload = googleIdToken.getPayload();
+    String email = payload.getEmail();
+    String name = (String) payload.get("name");
+    String pictureUrl = (String) payload.get("picture");
+    String googleId = payload.getSubject();
+    // 3. Tìm xem user đã tồn tại chưa (Account Linking)
+    User user = this.userRepository.findByEmail(email).map(existingUser -> {
+        // Nếu user đã có từ trước (ví dụ từng đăng ký thủ công), liên kết thêm googleId
+        if (existingUser.getGoogleId() == null) {
+            existingUser.setGoogleId(googleId);
+            return this.userRepository.save(existingUser);
+        }
+        return existingUser;
+    }).orElseGet(() -> {
+        // Nếu là user mới  -> Tự động đăng ký
+        Role userRole = this.roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setFullName(name);
+        newUser.setAvatarUrl(pictureUrl);
+        newUser.setGoogleId(googleId);
+        newUser.setAuthProvider(AuthProvider.GOOGLE);
+        newUser.setRole(userRole);
+        newUser.setIsActive(true);
+        newUser.setIsPhoneVerified(false);
+        return this.userRepository.save(newUser);
+    });
+    if (!Boolean.TRUE.equals(user.getIsActive())) {
+        throw new AppException(ErrorCode.ACCOUNT_LOCKED);
+    }
+    // 4. Cấp phát Access Token & Refresh Token Cookie 
+    String accessToken = this.securityUtil.createAccessToken(user);
+    String refreshToken = this.securityUtil.createRefreshToken(user);
+    ResponseCookie cookie = ResponseCookie.from("refresh_token", refreshToken)
+            .httpOnly(true)
+            .secure(false)
+            .path("/")
+            .maxAge(this.refreshTokenExpiration)
+            .sameSite("Lax")
+            .build();
+    response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    return AuthResponse.builder()
+            .accessToken(accessToken)
+            .user(toUserSummary(user))
+            .build();
+}
 }

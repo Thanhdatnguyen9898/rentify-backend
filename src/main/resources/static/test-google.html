@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Sign-In Test</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body style="padding: 50px; font-family: sans-serif;">
+    <h2>Bấm nút bên dưới để lấy Google ID Token test Postman</h2>
+
+    <!-- THAY CLIENT ID CỦA BẠN VÀO ĐÂY -->
+    <div id="g_id_onload"
+         data-client_id="315632727461-nvrqlmml2brane4vmse91un8milp7p4q.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin" data-type="standard"></div>
+
+    <h3 style="margin-top: 30px;">Chuỗi idToken của bạn (Copy chuỗi này vào Postman):</h3>
+    <textarea id="tokenBox" style="width: 100%; height: 150px;"></textarea>
+
+    <script>
+        function handleCredentialResponse(response) {
+            // Hiển thị token lên textarea để bạn dễ copy
+            document.getElementById("tokenBox").value = response.credential;
+            console.log("Google ID Token:", response.credential);
+        }
+    </script>
+</body>
+</html>

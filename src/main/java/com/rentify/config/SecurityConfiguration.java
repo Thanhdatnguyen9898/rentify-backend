@@ -44,8 +44,10 @@ public class SecurityConfiguration {
                 "/api/v1/auth/register",
                 "/api/v1/auth/refresh",
                 "/v3/api-docs/**",
+                "/api/v1/auth/google",
                 "/swagger-ui/**",
-                "/swagger-ui.html"
+                "/swagger-ui.html",
+                "/test-google.html"
         };
 
         http
