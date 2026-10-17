@@ -20,6 +20,8 @@ public enum ErrorCode {
     USERNAME_EXISTED(1007, "Tên đăng nhập (username) đã tồn tại", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(1008, "Email đã được sử dụng bởi tài khoản khác", HttpStatus.BAD_REQUEST),
     REFRESH_TOKEN_INVALID(1009, "Refresh Token không hợp lệ hoặc đã hết hạn", HttpStatus.BAD_REQUEST),
+    OTP_INVALID(1010, "Mã OTP không chính xác hoặc đã hết hạn", HttpStatus.BAD_REQUEST),
+    OTP_COOLDOWN(1011, "Vui lòng đợi 60 giây trước khi yêu cầu mã OTP mới", HttpStatus.TOO_MANY_REQUESTS),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode httpStatusCode) {

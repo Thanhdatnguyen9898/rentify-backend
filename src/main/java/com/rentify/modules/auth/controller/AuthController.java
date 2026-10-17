@@ -7,6 +7,8 @@ import com.rentify.common.response.annotation.ApiMessage;
 import com.rentify.modules.auth.dto.request.GoogleLoginRequest;
 import com.rentify.modules.auth.dto.request.LoginRequest;
 import com.rentify.modules.auth.dto.request.RegisterRequest;
+import com.rentify.modules.auth.dto.request.SendOtpRequest;
+import com.rentify.modules.auth.dto.request.UpgradeHostRequest;
 import com.rentify.modules.auth.dto.response.AuthResponse;
 import com.rentify.modules.auth.service.AuthService;
 
@@ -71,6 +73,21 @@ public class AuthController {
             @Valid @RequestBody GoogleLoginRequest request,
             HttpServletResponse response) {
         AuthResponse authResponse = this.authService.loginWithGoogle(request, response);
+        return ResponseEntity.ok(authResponse);
+    }
+    @PostMapping("/send-otp")
+    @ApiMessage("Gửi mã OTP thành công")
+    public ResponseEntity<Void> sendUpgradeOtp(@Valid @RequestBody SendOtpRequest request) {
+        this.authService.sendUpgradeOtp(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/upgrade-host")
+    @ApiMessage("Nâng cấp tài khoản lên Chủ nhà thành công")
+    public ResponseEntity<AuthResponse> upgradeToHost(
+            @Valid @RequestBody UpgradeHostRequest request,
+            HttpServletResponse response) {
+        AuthResponse authResponse = this.authService.upgradeToHost(request, response);
         return ResponseEntity.ok(authResponse);
     }
 }
